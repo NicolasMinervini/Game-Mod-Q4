@@ -634,7 +634,7 @@ bool idProjectile::Collide( const trace_t &collision, const idVec3 &velocity, bo
  	idVec3		dir;
  	bool		canDamage;
  	
- 	hitTeleporter = false;
+	hitTeleporter = false;
 
 	if ( state == EXPLODED || state == FIZZLED ) {
 		return true;
@@ -932,6 +932,72 @@ bool idProjectile::Collide( const trace_t &collision, const idVec3 &velocity, bo
 		return true;
 	}
 
+	//***************************************************************************************************************
+	//Rocket explodes and reflects off colliders
+	//spawnArgs.GetBool("rocket_proj")
+	if (spawnArgs.GetInt("decal_size") == 75) {
+		/*
+		* 
+		* Tries (and fails) to reflect the rocket off surfaces instead of just aligning it to the normal.
+		* No matter what I do to these lines the rocket just gets stuck on the surface in teh same manner.
+		* 
+		idVec3 veldir = physicsObj.GetLinearVelocity();
+		veldir.Normalize();
+		float dirDot = (veldir.x * collision.c.normal.x) + (veldir.y * collision.c.normal.y) + (veldir.z * collision.c.normal.z);
+		idVec3 reflection = (veldir - (2 * (dirDot) * collision.c.normal));
+		reflection.Normalize();
+		gameLocal.Printf("Initial direction: %f, %f, %f.\nNew direction: %f, %f, %f.", veldir.x, veldir.y, veldir.z, reflection.x, reflection.y, reflection.z);
+		physicsObj.SetLinearVelocity(reflection * speed.GetCurrentValue(gameLocal.time) + (reflection * 999999.9));
+		*/
+
+		/*
+		* 
+		* just another failed attempt at doing something interesting that DOESNT result in the rocket getting stuck on the ground
+		* 
+		idVec3 veldir = physicsObj.GetLinearVelocity();
+		veldir.Normalize();
+		idVec3 randomDir;
+		srand(rand());
+		randomDir.x = rand();
+		srand(rand());
+		randomDir.y = rand();
+		srand(rand());
+		randomDir.z = rand();
+		randomDir.Normalize();
+		gameLocal.Printf("Initial direction: %f, %f, %f.\nNew direction: %f, %f, %f.\n", veldir.x, veldir.y, veldir.z, randomDir.x, randomDir.y, randomDir.z);
+		physicsObj.SetLinearVelocity(randomDir * speed.GetCurrentValue(gameLocal.time) + (randomDir * 999999.9));
+		*/
+
+		physicsObj.SetLinearVelocity(collision.c.normal * speed.GetCurrentValue( gameLocal.time ) + (collision.c.normal * 999999.9));
+
+		// splash damage
+		float removeTime = 0;
+		float delay = spawnArgs.GetFloat("delay_splash");
+		if (delay) {
+			if (removeTime < delay * 1000) {
+				removeTime = (delay + 0.10) * 1000;
+			}
+			PostEventSec(&EV_RadiusDamage, delay, ignore);
+		}
+		else {
+			Event_RadiusDamage(ignore);
+		}
+
+		// Residual damage (damage over time)
+		delay = SEC2MS(spawnArgs.GetFloat("delay_residual"));
+		if (delay > 0.0f) {
+			PostEventMS(&EV_ResidualDamage, delay, ignore);
+
+			// Keep the projectile around until the residual damage is done		
+			delay = SEC2MS(spawnArgs.GetFloat("residual_time"));
+			if (removeTime < delay) {
+				removeTime = delay;
+			}
+		}
+
+		return true;
+	}
+
 	Explode( &collision, false, ignore );
 
 	return true;
@@ -1198,6 +1264,12 @@ void idProjectile::Explode( const trace_t *collision, const bool showExplodeFX, 
 	if ( collision && gameLocal.entities[collision->c.entityNum] && spawnArgs.GetBool( "bindOnImpact" ) ) {
 		Bind( gameLocal.entities[collision->c.entityNum], true );
 	}
+
+
+	//if (spawnArgs.GetBool("rocket_proj")) {
+	//	gameLocal.Printf("Kablooey!");
+	//	return;
+	//}
 
 	// splash damage
 	removeTime = 0;
