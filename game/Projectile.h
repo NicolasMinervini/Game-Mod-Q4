@@ -147,6 +147,9 @@ private:
 	idVec3					launchDir;
 	// set from def file in :Launch on both client and server
 	float					launchSpeed;
+
+	//idVec3 of the last collided normal. Should prevent rockets from getting stuck in ricochets.
+	idVec3					lastCol;
 };
 
 ID_INLINE float idProjectile::GetSpeed ( void ) const {

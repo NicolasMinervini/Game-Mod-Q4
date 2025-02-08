@@ -77,6 +77,10 @@ idProjectile::idProjectile( void ) {
 	launchOrig			= vec3_origin;
 	launchDir			= vec3_origin;
 	launchSpeed			= 0.0f;
+
+	lastCol.x = 6.9;
+	lastCol.y = 6.9;
+	lastCol.z = 6.9;
 }
 
 /*
@@ -936,10 +940,11 @@ bool idProjectile::Collide( const trace_t &collision, const idVec3 &velocity, bo
 	//Rocket explodes and reflects off colliders
 	//spawnArgs.GetBool("rocket_proj")
 	if (spawnArgs.GetInt("decal_size") == 75) {
+
 		/*
 		* 
-		* Tries (and fails) to reflect the rocket off surfaces instead of just aligning it to the normal.
-		* No matter what I do to these lines the rocket just gets stuck on the surface in teh same manner.
+		* Behold my graveyard. Look at all the fucking shit I wrote that didn't work. All of this for rockets to reflect off of surfaces properly.
+		* I should have just been happy with them facing in the direction of the surface's normal.
 		* 
 		idVec3 veldir = physicsObj.GetLinearVelocity();
 		veldir.Normalize();
@@ -948,11 +953,7 @@ bool idProjectile::Collide( const trace_t &collision, const idVec3 &velocity, bo
 		reflection.Normalize();
 		gameLocal.Printf("Initial direction: %f, %f, %f.\nNew direction: %f, %f, %f.", veldir.x, veldir.y, veldir.z, reflection.x, reflection.y, reflection.z);
 		physicsObj.SetLinearVelocity(reflection * speed.GetCurrentValue(gameLocal.time) + (reflection * 999999.9));
-		*/
-
-		/*
-		* 
-		* just another failed attempt at doing something interesting that DOESNT result in the rocket getting stuck on the ground
+		*
 		* 
 		idVec3 veldir = physicsObj.GetLinearVelocity();
 		veldir.Normalize();
@@ -966,9 +967,37 @@ bool idProjectile::Collide( const trace_t &collision, const idVec3 &velocity, bo
 		randomDir.Normalize();
 		gameLocal.Printf("Initial direction: %f, %f, %f.\nNew direction: %f, %f, %f.\n", veldir.x, veldir.y, veldir.z, randomDir.x, randomDir.y, randomDir.z);
 		physicsObj.SetLinearVelocity(randomDir * speed.GetCurrentValue(gameLocal.time) + (randomDir * 999999.9));
+		* 
+		*
+		if (!lastCol.Compare(collision.c.normal)) {
+			//lastCol.x = collision.c.normal.x;
+			//lastCol.y = collision.c.normal.y;
+			//lastCol.z = collision.c.normal.z;
+		}
+		*
+		*
+		randomDir.x = rvRandom::flrand(0.0, 999.9);
+		gameLocal.Printf("Rand result: %f", randomDir.x);
+		randomDir.y = rvRandom::flrand(0.0, 999.9);
+		gameLocal.Printf("Rand result: %f", randomDir.y);
+		randomDir.z = rvRandom::flrand(0.0,999.9);
+		gameLocal.Printf("Rand result: %f", randomDir.z);
+		
 		*/
+		
 
-		physicsObj.SetLinearVelocity(collision.c.normal * speed.GetCurrentValue( gameLocal.time ) + (collision.c.normal * 999999.9));
+		idVec3 randomDir;
+		gameLocal.Printf("%f, %f, %f\n", collision.c.normal.x, collision.c.normal.y, collision.c.normal.z);
+		randomDir.x = collision.c.normal.x + rvRandom::flrand(-0.0002, 0.0002);
+		randomDir.y = collision.c.normal.y + rvRandom::flrand(-0.0002, 0.0002);
+		randomDir.z = collision.c.normal.z + rvRandom::flrand(-0.0002, 0.0002);
+
+		
+
+		randomDir.Normalize();
+		physicsObj.SetLinearVelocity(randomDir* speed.GetCurrentValue(gameLocal.time) + (randomDir * 1000000.0));
+
+		//physicsObj.SetLinearVelocity(collision.c.normal * speed.GetCurrentValue( gameLocal.time ) + (collision.c.normal * 999999.9));
 
 		// splash damage
 		float removeTime = 0;
