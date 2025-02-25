@@ -382,7 +382,7 @@ stateResult_t rvWeaponBlaster::State_Charged ( const stateParms_t& parms ) {
 			return SRESULT_STAGE(CHARGED_WAIT);
 			
 		case CHARGED_WAIT:
-			if ( !wsfl.attack ) {
+			if ( wsfl.attack ) {
 				fireForced = true;
 				SetState ( "Fire", 0 );
 				return SRESULT_DONE;
@@ -424,8 +424,7 @@ stateResult_t rvWeaponBlaster::State_Fire ( const stateParms_t& parms ) {
 				return SRESULT_DONE;
 			}
 
-
-	
+	/*
 			if ( gameLocal.time - fireHeldTime > chargeTime ) {	
 				Attack ( true, 1, spread, 0, 1.0f );
 				PlayEffect ( "fx_chargedflash", barrelJointView, false );
@@ -435,8 +434,22 @@ stateResult_t rvWeaponBlaster::State_Fire ( const stateParms_t& parms ) {
 				PlayEffect ( "fx_normalflash", barrelJointView, false );
 				PlayAnim( ANIMCHANNEL_ALL, "fire", parms.blendFrames );
 			}
+	*/
+			Attack(false, 1, spread, 0, 1.0f);
+			PlayEffect("fx_normalflash", barrelJointView, false);
+			PlayAnim(ANIMCHANNEL_ALL, "fire", parms.blendFrames);
+
 			fireHeldTime = 0;
 			
+			if (wsfl.attack) {
+				fireHeldTime = gameLocal.time;
+				SetState("Charge", 4);
+			}
+			else {
+				fireHeldTime = 0;
+				SetState("Idle", 4);
+			}
+
 			return SRESULT_STAGE(FIRE_WAIT);
 		
 		case FIRE_WAIT:
