@@ -331,6 +331,12 @@ public:
 	idEntityPtr<idEntity>			projectileEnt;
 	idVec3							ejectOffset;
 
+	bool holding = false;
+	int heldTime = 0;
+	int minHoldLength = 100;
+	int doubleHoldLength = 500;
+	int tripleHoldLength = 1000;
+
 	int								fireRate;
 	int								altFireRate;
 	float							spread;

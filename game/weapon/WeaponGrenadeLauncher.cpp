@@ -102,18 +102,29 @@ stateResult_t rvWeaponGrenadeLauncher::State_Idle( const stateParms_t& parms ) {
 			PlayCycle( ANIMCHANNEL_ALL, GetIdleAnim(), parms.blendFrames );
 			return SRESULT_STAGE ( STAGE_WAIT );
 		
-		case STAGE_WAIT:			
+		case STAGE_WAIT:
+			if (!holding && wsfl.attack) {
+				holding = true;
+				heldTime = gameLocal.time;
+			}
 			if ( wsfl.lowerWeapon ) {
 				SetState ( "Lower", 4 );
 				return SRESULT_DONE;
 			}		
-			if ( !clipSize ) {
-				if ( wsfl.attack && AmmoAvailable ( ) ) {
+			if (wsfl.attack && heldTime + tripleHoldLength < gameLocal.time) {
+				holding = false;
+				SetState("Fire", 0);
+				return SRESULT_DONE;
+			}
+			if (holding && heldTime + minHoldLength < gameLocal.time && !clipSize ) {
+				if ( !wsfl.attack && AmmoAvailable ( ) ) {
+					holding = false;
 					SetState ( "Fire", 0 );
 					return SRESULT_DONE;
 				}
 			} else { 
-				if ( gameLocal.time > nextAttackTime && wsfl.attack && AmmoInClip ( ) ) {
+				if (holding && heldTime + minHoldLength < gameLocal.time && gameLocal.time > nextAttackTime && !wsfl.attack && AmmoInClip ( ) ) {
+					holding = false;
 					SetState ( "Fire", 0 );
 					return SRESULT_DONE;
 				}  
@@ -145,12 +156,22 @@ stateResult_t rvWeaponGrenadeLauncher::State_Fire ( const stateParms_t& parms ) 
 	switch ( parms.stage ) {
 		case STAGE_INIT:
 			nextAttackTime = gameLocal.time + (fireRate * owner->PowerUpModifier ( PMOD_FIRERATE ));
-			Attack ( false, 1, spread, 0, 1.0f );
+			if (gameLocal.time - heldTime > tripleHoldLength) {
+				Attack(false, 3, spread + 20, 0, 1.0f);
+			}
+			else if (gameLocal.time - heldTime > doubleHoldLength) {
+				Attack(false, 2, spread + 10, 0, 1.0f);
+			}
+			else {
+				Attack(false, 1, spread, 0, 1.0f);
+			}
+			//Attack ( false, 1, spread, 0, 1.0f );
 			PlayAnim ( ANIMCHANNEL_ALL, GetFireAnim(), 0 );	
 			return SRESULT_STAGE ( STAGE_WAIT );
 	
 		case STAGE_WAIT:		
-			if ( wsfl.attack && gameLocal.time >= nextAttackTime && AmmoInClip() && !wsfl.lowerWeapon ) {
+			if (holding && heldTime + minHoldLength < gameLocal.time && !wsfl.attack && gameLocal.time >= nextAttackTime && AmmoInClip() && !wsfl.lowerWeapon ) {
+				holding = false;
 				SetState ( "Fire", 0 );
 				return SRESULT_DONE;
 			}
