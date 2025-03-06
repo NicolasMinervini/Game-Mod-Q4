@@ -204,7 +204,7 @@ stateResult_t rvWeaponMachinegun::State_Idle( const stateParms_t& parms ) {
 					SetState ( "Reload", 4 );
 					return SRESULT_DONE;			
 				}
-				if ( wsfl.netReload || (wsfl.reload && AmmoInClip() < ClipSize() && AmmoAvailable()>AmmoInClip()) ) {
+				if ( wsfl.netReload || (wsfl.reload && AmmoInClip() <= ClipSize() && AmmoAvailable()>=AmmoInClip()) ) {
 					SetState ( "Reload", 4 );
 					return SRESULT_DONE;			
 				}				
@@ -226,13 +226,15 @@ stateResult_t rvWeaponMachinegun::State_Fire ( const stateParms_t& parms ) {
 	};	
 	switch ( parms.stage ) {
 		case STAGE_INIT:
-			if ( wsfl.zoom ) {
-				nextAttackTime = gameLocal.time + (altFireRate * owner->PowerUpModifier ( PMOD_FIRERATE ));
-				Attack ( true, 1, spreadZoom, 0, 1.0f );
-				fireHeld = true;
+			if ( altMode ) {
+				//nextAttackTime = gameLocal.time + (altFireRate * owner->PowerUpModifier ( PMOD_FIRERATE ));
+				nextAttackTime = gameLocal.time + (fireRate * 10 * owner->PowerUpModifier(PMOD_FIRERATE));
+				//Attack ( true, 1, spreadZoom, 0, 1.0f );
+				Attack( false, 3, 0, 0, 15.0f );
+				//fireHeld = true;
 			} else {
 				nextAttackTime = gameLocal.time + (fireRate * owner->PowerUpModifier ( PMOD_FIRERATE ));
-				Attack ( false, 1, spread, 0, 1.0f );
+				Attack ( false, 3, 17, 0, 1.2f/5.0f );
 			}
 			PlayAnim ( ANIMCHANNEL_ALL, "fire", 0 );	
 			return SRESULT_STAGE ( STAGE_WAIT );
@@ -278,6 +280,7 @@ stateResult_t rvWeaponMachinegun::State_Reload ( const stateParms_t& parms ) {
 			
 		case STAGE_WAIT:
 			if ( AnimDone ( ANIMCHANNEL_ALL, 4 ) ) {
+				altMode = !altMode;
 				AddToClip ( ClipSize() );
 				SetState ( "Idle", 4 );
 				return SRESULT_DONE;

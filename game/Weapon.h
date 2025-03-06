@@ -337,6 +337,8 @@ public:
 	int doubleHoldLength = 500;
 	int tripleHoldLength = 1000;
 
+	bool altMode = false;
+
 	int								fireRate;
 	int								altFireRate;
 	float							spread;

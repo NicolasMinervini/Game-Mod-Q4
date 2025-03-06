@@ -122,18 +122,24 @@ stateResult_t rvWeaponShotgun::State_Idle( const stateParms_t& parms ) {
 			PlayCycle( ANIMCHANNEL_ALL, "idle", parms.blendFrames );
 			return SRESULT_STAGE ( STAGE_WAIT );
 		
-		case STAGE_WAIT:			
+		case STAGE_WAIT:
+			if (!holding && wsfl.attack) {
+				holding = true;
+				heldTime = gameLocal.time;
+			}
 			if ( wsfl.lowerWeapon ) {
 				SetState( "Lower", 4 );
 				return SRESULT_DONE;
 			}		
-			if ( !clipSize ) {
-				if ( gameLocal.time > nextAttackTime && wsfl.attack && AmmoAvailable ( ) ) {
+			if (holding && heldTime + 1 < gameLocal.time && !clipSize ) {
+				if ( gameLocal.time > nextAttackTime && !wsfl.attack && AmmoAvailable ( ) ) {
+					holding = false;
 					SetState( "Fire", 0 );
 					return SRESULT_DONE;
 				}  
 			} else {				
-				if ( gameLocal.time > nextAttackTime && wsfl.attack && AmmoInClip ( ) ) {
+				if (holding && heldTime + 1 < gameLocal.time && gameLocal.time > nextAttackTime && !wsfl.attack && AmmoInClip ( ) ) {
+					holding = false;
 					SetState( "Fire", 0 );
 					return SRESULT_DONE;
 				}  
@@ -164,7 +170,30 @@ stateResult_t rvWeaponShotgun::State_Fire( const stateParms_t& parms ) {
 	switch ( parms.stage ) {
 		case STAGE_INIT:
 			nextAttackTime = gameLocal.time + (fireRate * owner->PowerUpModifier ( PMOD_FIRERATE ));
-			Attack( false, hitscans, spread, 0, 1.0f );
+			//Attack( false, hitscans, spread, 0, 1.0f );
+			/*
+			if (gameLocal.time - heldTime > tripleHoldLength) {
+				Attack(false, hitscans, spread/4, 0, 1.0f);
+			}
+			else if (gameLocal.time - heldTime > doubleHoldLength) {
+				Attack(false, hitscans, spread/2.0, 0, 1.0f);
+			}
+			else {
+				Attack(false, hitscans, spread, 0, 1.0f);
+			}
+			*/
+
+			if (((gameLocal.time - heldTime) * 0.001) <= 0) {
+				Attack(false, hitscans, spread, 0, 1.0f);
+			}
+			else {
+				Attack(false, hitscans, (spread / ((gameLocal.time - heldTime) * 0.001f)), 0, 1.0f);
+			}
+
+			// Attack(false, hitscans, spread, 0, 1.0f);
+
+			//((gameLocal.time - heldTime) * 0.001)
+
 			PlayAnim( ANIMCHANNEL_ALL, "fire", 0 );	
 			return SRESULT_STAGE( STAGE_WAIT );
 	
@@ -173,7 +202,8 @@ stateResult_t rvWeaponShotgun::State_Fire( const stateParms_t& parms ) {
 				SetState( "Idle", 0 );
 				return SRESULT_DONE;
 			}									
-			if ( wsfl.attack && gameLocal.time >= nextAttackTime && AmmoInClip() ) {
+			if (holding && heldTime + 1 < gameLocal.time && wsfl.attack && gameLocal.time >= nextAttackTime && AmmoInClip() ) {
+				holding = false;
 				SetState( "Fire", 0 );
 				return SRESULT_DONE;
 			}
