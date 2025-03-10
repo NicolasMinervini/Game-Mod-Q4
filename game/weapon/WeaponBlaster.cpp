@@ -334,6 +334,7 @@ stateResult_t rvWeaponBlaster::State_Charge ( const stateParms_t& parms ) {
 		CHARGE_INIT,
 		CHARGE_WAIT,
 	};	
+	float asb = 1.0f;
 	switch ( parms.stage ) {
 		case CHARGE_INIT:
 			viewModel->SetShaderParm ( BLASTER_SPARM_CHARGEGLOW, chargeGlow[0] );
@@ -342,7 +343,11 @@ stateResult_t rvWeaponBlaster::State_Charge ( const stateParms_t& parms ) {
 			return SRESULT_STAGE ( CHARGE_WAIT );
 			
 		case CHARGE_WAIT:	
-			if ( gameLocal.time - fireHeldTime < chargeTime ) {
+			//float asb = 1.0f;
+			if (gameLocal.GetLocalPlayer()) {
+				asb = gameLocal.GetLocalPlayer()->inventory.attackSpeedBoost;
+			}
+			if ( gameLocal.time - fireHeldTime < (chargeTime * asb) ) {
 				float f;
 				f = (float)(gameLocal.time - fireHeldTime) / (float)chargeTime;
 				f = chargeGlow[0] + f * (chargeGlow[1] - chargeGlow[0]);

@@ -7689,7 +7689,7 @@ idEntity* idGameLocal::HitScan(
 				// Apply force to the entity that was hit
 				ent->ApplyImpulse( owner, tr.c.id, tr.c.point, -tr.c.normal, &hitscanDict );
 
-				// Handle damage to the entity
+				// Handle damage to the entity.
 				if ( ent->fl.takedamage && !(( tr.c.material != NULL ) && ( tr.c.material->GetSurfaceFlags() & SURF_NODAMAGE )) ) {		
 					const char*	damage;
 				
@@ -7734,6 +7734,12 @@ idEntity* idGameLocal::HitScan(
 					if ( !g_perfTest_weaponNoFX.GetBool() ) {
 						ent->AddDamageEffect ( tr, dir, damage, owner );
 					}
+					/*
+					if (damage && GetLocalPlayer()) {
+						Printf("Damaged ent %s", ent->name);
+						GetLocalPlayer()->health += 1;
+					}
+					*/
 				} else { 
 					if ( actualHitEnt
 						 && actualHitEnt != ent
@@ -7751,6 +7757,12 @@ idEntity* idGameLocal::HitScan(
 							if ( damage && damage[0] ) {
 								actualHitEnt->Damage( owner, owner, dir, damage, damageScale, CLIPMODEL_ID_TO_JOINT_HANDLE( tr.c.id ) );
 							}
+							/*
+							if (damage && GetLocalPlayer()) {
+								Printf("Damaged ent %s", ent->name);
+								GetLocalPlayer()->health += 1;
+							}
+							*/
 						}
 					if ( !g_perfTest_weaponNoFX.GetBool() ) {
 						ent->AddDamageEffect( tr, dir, hitscanDict.GetString ( "def_damage" ), owner );

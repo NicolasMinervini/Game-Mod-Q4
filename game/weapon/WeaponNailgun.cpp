@@ -602,7 +602,7 @@ stateResult_t rvWeaponNailgun::State_Idle( const stateParms_t& parms ) {
 				SetState ( "Lower", 4 );
 				return SRESULT_DONE;
 			}
-		
+
 			if ( !clipSize ) {
 				if ( gameLocal.time > nextAttackTime && wsfl.attack && AmmoAvailable ( ) ) {
 					SetState ( "Fire", 0 );
@@ -642,6 +642,7 @@ stateResult_t rvWeaponNailgun::State_Fire( const stateParms_t& parms ) {
 		STAGE_DONE,
 		STAGE_SPINEMPTY,		
 	};	
+	float asb = 1.0f;
 	switch ( parms.stage ) {
 		case STAGE_INIT:
 			if ( !wsfl.attack ) {
@@ -659,20 +660,26 @@ stateResult_t rvWeaponNailgun::State_Fire( const stateParms_t& parms ) {
 		case STAGE_FIRE:
 			if ( !wsfl.attack || wsfl.reload || wsfl.lowerWeapon || AmmoInClip ( ) <= 0 ) {
 				return SRESULT_STAGE ( STAGE_DONE );
+				holding = false;
 			}
 			if ( mods & NAILGUN_MOD_ROF_AMMO ) {
 				PlayCycle ( ANIMCHANNEL_LEGS, "fire_fast", 4 );
 			} else {
 				PlayCycle ( ANIMCHANNEL_LEGS, "fire_slow", 4 );
 			}
-
+			
+			//float asb = 1.0f;
+			if (gameLocal.GetLocalPlayer()) {
+				asb = gameLocal.GetLocalPlayer()->inventory.attackSpeedBoost;
+			}
 			if ( wsfl.zoom ) {				
 				Attack ( true, 1, spread, 0.0f, 1.0f );
-				nextAttackTime = gameLocal.time + (altFireRate * owner->PowerUpModifier ( PMOD_FIRERATE ));
+				nextAttackTime = gameLocal.time + (altFireRate * asb * owner->PowerUpModifier ( PMOD_FIRERATE ));
 			} else {
 				Attack ( false, 1, spread, 0.0f, 1.0f );
-				nextAttackTime = gameLocal.time + (fireRate * owner->PowerUpModifier ( PMOD_FIRERATE ));
+				nextAttackTime = gameLocal.time + (fireRate * asb * owner->PowerUpModifier ( PMOD_FIRERATE ));
 			}
+			
 			
 			// Play the exhaust effects
 			viewModel->PlayEffect ( "fx_exhaust", jointSteamRightView, false );

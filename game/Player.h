@@ -196,6 +196,27 @@ class idInventory {
 public:
 	int						maxHealth;
 	int						weapons;
+
+	//increased health ADDITIVE (this multiplied by a number will be added to maxhealth)
+	int healthBoosts = 0;
+	void AddHealthBoost();
+
+	//fire rate MULTIPLIER (the time waiting between shots will be multiplied by this. Picking up upgrades should probbaly LOWER this value!)
+	float  attackSpeedBoost = 1.0f;
+	void AddAttackSpeedBoost();
+
+	//increased speed ADDITIVE
+	int speedBoosts = 0;
+	void AddSpeedBoost();
+
+	//jump height MULTIPLIER (this value should INCREASE!)
+	float jumpBoost = 1.0f;
+	void AddJumpBoost();
+
+	//number of health gained on hit. ADDITIVE
+	int leechBoosts = 0;
+	void AddLeechBoost();
+
 // RITUAL BEGIN
 // squirrel: Mode-agnostic buymenus
 	int						carryOverWeapons;

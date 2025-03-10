@@ -3022,6 +3022,61 @@ void Cmd_ShuffleTeams_f( const idCmdArgs& args ) {
 	gameLocal.mpGame.ShuffleTeams();
 }
 
+void Cmd_ShowBoosts_f(const idCmdArgs& args) {
+	if (gameLocal.GetLocalPlayer()) {
+		gameLocal.Printf("health upgrades: %d\n", gameLocal.GetLocalPlayer()->inventory.healthBoosts);
+		gameLocal.Printf("attack speed modifier: %f\n", gameLocal.GetLocalPlayer()->inventory.attackSpeedBoost);
+		gameLocal.Printf("move speed upgrades: %d\n", gameLocal.GetLocalPlayer()->inventory.speedBoosts);
+		gameLocal.Printf("jump modifier: %f\n", gameLocal.GetLocalPlayer()->inventory.jumpBoost);
+		gameLocal.Printf("leech upgrades: %d\n", gameLocal.GetLocalPlayer()->inventory.leechBoosts);
+	}
+	else {
+		gameLocal.Printf("No local player!\n");
+	}
+	//gameLocal.Printf("skibidi toilet %d\n", gameLocal.healthBoosts);
+}
+
+void Cmd_GiveHealth_f(const idCmdArgs& args) {
+	if (gameLocal.GetLocalPlayer()) {
+		gameLocal.GetLocalPlayer()->inventory.AddHealthBoost();
+	}
+	else {
+		gameLocal.Printf("No local player!\n");
+	}
+}
+void Cmd_GiveAttackSpeed_f(const idCmdArgs& args) {
+	if (gameLocal.GetLocalPlayer()) {
+		gameLocal.GetLocalPlayer()->inventory.AddAttackSpeedBoost();
+	}
+	else {
+		gameLocal.Printf("No local player!\n");
+	}
+}
+void Cmd_GiveSpeed_f(const idCmdArgs& args) {
+	if (gameLocal.GetLocalPlayer()) {
+		gameLocal.GetLocalPlayer()->inventory.AddSpeedBoost();
+	}
+	else {
+		gameLocal.Printf("No local player!\n");
+	}
+}
+void Cmd_GiveJump_f(const idCmdArgs& args) {
+	if (gameLocal.GetLocalPlayer()) {
+		gameLocal.GetLocalPlayer()->inventory.AddJumpBoost();
+	}
+	else {
+		gameLocal.Printf("No local player!\n");
+	}
+}
+void Cmd_GiveLeech_f(const idCmdArgs& args) {
+	if (gameLocal.GetLocalPlayer()) {
+		gameLocal.GetLocalPlayer()->inventory.AddLeechBoost();
+	}
+	else {
+		gameLocal.Printf("No local player!\n");
+	}
+}
+
 #ifndef _FINAL
 void Cmd_ClientOverflowReliable_f( const idCmdArgs& args ) {
 	idBitMsg	outMsg;
@@ -3053,6 +3108,13 @@ void idGameLocal::InitConsoleCommands( void ) {
 //	cmdSystem->AddCommand( "writeGameState",		WriteGameState_f,			CMD_FL_GAME,				"write game state" );
 //	cmdSystem->AddCommand( "testSaveGame",			TestSaveGame_f,				CMD_FL_GAME|CMD_FL_CHEAT,	"test a save game for a level" );
 // RAVEN END
+	cmdSystem->AddCommand( "upgrades",				Cmd_ShowBoosts_f,			CMD_FL_GAME,				"displays player upgrades");
+	cmdSystem->AddCommand("healthUpgrade",			Cmd_GiveHealth_f,			CMD_FL_GAME,				"gives the player a health upgrade");
+	cmdSystem->AddCommand("atkspeedupgrade", Cmd_GiveAttackSpeed_f, CMD_FL_GAME, "gives the player an attack speed upgrade");
+	cmdSystem->AddCommand("speedupgrade", Cmd_GiveSpeed_f, CMD_FL_GAME, "gives the player a movement speed upgrade");
+	cmdSystem->AddCommand("jumpupgrade", Cmd_GiveJump_f, CMD_FL_GAME, "gives the player a jump height upgrade");
+	cmdSystem->AddCommand("leechUpgrade", Cmd_GiveLeech_f, CMD_FL_GAME, "gives the player a leeching upgrade");
+
 	cmdSystem->AddCommand( "game_memory",			idClass::DisplayInfo_f,		CMD_FL_GAME,				"displays game class info" );
 	cmdSystem->AddCommand( "listClasses",			idClass::ListClasses_f,		CMD_FL_GAME,				"lists game classes" );
 	cmdSystem->AddCommand( "listThreads",			idThread::ListThreads_f,	CMD_FL_GAME|CMD_FL_CHEAT,	"lists script threads" );

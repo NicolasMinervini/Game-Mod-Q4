@@ -91,6 +91,7 @@ stateResult_t rvWeaponGrenadeLauncher::State_Idle( const stateParms_t& parms ) {
 		STAGE_INIT,
 		STAGE_WAIT,
 	};	
+	float asb = 1.0f;
 	switch ( parms.stage ) {
 		case STAGE_INIT:
 			if ( !AmmoAvailable ( ) ) {
@@ -106,24 +107,31 @@ stateResult_t rvWeaponGrenadeLauncher::State_Idle( const stateParms_t& parms ) {
 			if (!holding && wsfl.attack) {
 				holding = true;
 				heldTime = gameLocal.time;
+				//float asb = 1.0f;
+				if (gameLocal.GetLocalPlayer()) {
+					asb = gameLocal.GetLocalPlayer()->inventory.attackSpeedBoost;
+					tripleHoldLength = 1000 * asb;
+					doubleHoldLength = 500 * asb;
+					minHoldLength = 100 * asb;
+				}
 			}
 			if ( wsfl.lowerWeapon ) {
 				SetState ( "Lower", 4 );
 				return SRESULT_DONE;
 			}		
-			if (wsfl.attack && heldTime + tripleHoldLength < gameLocal.time) {
+			if (wsfl.attack && heldTime + (int)tripleHoldLength < gameLocal.time) {
 				holding = false;
 				SetState("Fire", 0);
 				return SRESULT_DONE;
 			}
-			if (holding && heldTime + minHoldLength < gameLocal.time && !clipSize ) {
+			if (holding && heldTime + (int)minHoldLength < gameLocal.time && !clipSize ) {
 				if ( !wsfl.attack && AmmoAvailable ( ) ) {
 					holding = false;
 					SetState ( "Fire", 0 );
 					return SRESULT_DONE;
 				}
 			} else { 
-				if (holding && heldTime + minHoldLength < gameLocal.time && gameLocal.time > nextAttackTime && !wsfl.attack && AmmoInClip ( ) ) {
+				if (holding && heldTime + (int)minHoldLength < gameLocal.time && gameLocal.time > nextAttackTime && !wsfl.attack && AmmoInClip ( ) ) {
 					holding = false;
 					SetState ( "Fire", 0 );
 					return SRESULT_DONE;
@@ -153,17 +161,29 @@ stateResult_t rvWeaponGrenadeLauncher::State_Fire ( const stateParms_t& parms ) 
 		STAGE_INIT,
 		STAGE_WAIT,
 	};	
+	float asb = 1.0f;
 	switch ( parms.stage ) {
 		case STAGE_INIT:
-			nextAttackTime = gameLocal.time + (fireRate * owner->PowerUpModifier ( PMOD_FIRERATE ));
+			//float asb = 1.0f;
+			if (gameLocal.GetLocalPlayer()) {
+				asb = gameLocal.GetLocalPlayer()->inventory.attackSpeedBoost;
+				tripleHoldLength = 1000 * asb;
+				doubleHoldLength = 500 * asb;
+				minHoldLength = 100 * asb;
+			}
+			nextAttackTime = gameLocal.time + (fireRate * asb * owner->PowerUpModifier ( PMOD_FIRERATE ));
+			gameLocal.Printf("time:%d next:%d triple:%f double:%f min:%f\n", gameLocal.time,nextAttackTime,tripleHoldLength,doubleHoldLength,minHoldLength);
 			if (gameLocal.time - heldTime > tripleHoldLength) {
 				Attack(false, 3, spread + 20, 0, 1.0f);
+				gameLocal.Printf("triple! %d\n", gameLocal.time - heldTime);
 			}
 			else if (gameLocal.time - heldTime > doubleHoldLength) {
 				Attack(false, 2, spread + 10, 0, 1.0f);
+				gameLocal.Printf("double! %d\n", gameLocal.time - heldTime);
 			}
 			else {
 				Attack(false, 1, spread, 0, 1.0f);
+				gameLocal.Printf("single! %d\n", gameLocal.time - heldTime);
 			}
 			//Attack ( false, 1, spread, 0, 1.0f );
 			PlayAnim ( ANIMCHANNEL_ALL, GetFireAnim(), 0 );	

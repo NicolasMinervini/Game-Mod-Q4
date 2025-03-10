@@ -224,16 +224,21 @@ stateResult_t rvWeaponMachinegun::State_Fire ( const stateParms_t& parms ) {
 		STAGE_INIT,
 		STAGE_WAIT,
 	};	
+	float asb = 1.0f;
 	switch ( parms.stage ) {
 		case STAGE_INIT:
+			//float asb = 1.0f;
+			if (gameLocal.GetLocalPlayer()) {
+				asb = gameLocal.GetLocalPlayer()->inventory.attackSpeedBoost;
+			}
 			if ( altMode ) {
 				//nextAttackTime = gameLocal.time + (altFireRate * owner->PowerUpModifier ( PMOD_FIRERATE ));
-				nextAttackTime = gameLocal.time + (fireRate * 10 * owner->PowerUpModifier(PMOD_FIRERATE));
+				nextAttackTime = gameLocal.time + (fireRate * asb * 10 * owner->PowerUpModifier(PMOD_FIRERATE));
 				//Attack ( true, 1, spreadZoom, 0, 1.0f );
 				Attack( false, 3, 0, 0, 15.0f );
 				//fireHeld = true;
 			} else {
-				nextAttackTime = gameLocal.time + (fireRate * owner->PowerUpModifier ( PMOD_FIRERATE ));
+				nextAttackTime = gameLocal.time + (fireRate * asb * owner->PowerUpModifier ( PMOD_FIRERATE ));
 				Attack ( false, 3, 17, 0, 1.2f/5.0f );
 			}
 			PlayAnim ( ANIMCHANNEL_ALL, "fire", 0 );	

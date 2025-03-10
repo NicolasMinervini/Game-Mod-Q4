@@ -333,9 +333,9 @@ public:
 
 	bool holding = false;
 	int heldTime = 0;
-	int minHoldLength = 100;
-	int doubleHoldLength = 500;
-	int tripleHoldLength = 1000;
+	float minHoldLength = 100;
+	float doubleHoldLength = 500;
+	float tripleHoldLength = 1000;
 
 	bool altMode = false;
 

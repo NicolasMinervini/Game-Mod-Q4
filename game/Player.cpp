@@ -316,6 +316,13 @@ void idInventory::GetPersistantData( idDict &dict ) {
 		sprintf( key, "levelTrigger_Trigger_%i", i );
 		dict.Set( key, levelTriggers[i].triggerName );
 	}
+
+	//Upgrades
+	dict.SetInt("healthBoosts", healthBoosts);
+	dict.SetFloat("attackSpeedBoost", attackSpeedBoost);
+	dict.SetInt("speedBoosts", speedBoosts);
+	dict.SetFloat("jumpBoost", jumpBoost);
+	dict.SetInt("leechBoosts", leechBoosts);
 }
 
 /*
@@ -389,6 +396,21 @@ void idInventory::RestoreInventory( idPlayer *owner, const idDict &dict ) {
 		levelTriggers.Append( lti );
 	}
 
+	if (dict.GetInt("healthBoosts")) {
+		healthBoosts = dict.GetInt("healthBoosts");
+	}
+	if (dict.GetInt("attackSpeedBoost")) {
+		healthBoosts = dict.GetFloat("attackSpeedBoost");
+	}
+	if (dict.GetInt("speedBoosts")) {
+		speedBoosts = dict.GetInt("speedBoosts");
+	}
+	if (dict.GetFloat("jumpBoost")) {
+		jumpBoost = dict.GetFloat("jumpBoost");
+	}
+	if (dict.GetInt("leechBoosts")) {
+		healthBoosts = dict.GetInt("leechBoosts");
+	}
 }
 
 /*
@@ -398,6 +420,12 @@ idInventory::Save
 */
 void idInventory::Save( idSaveGame *savefile ) const {
 	int i;
+
+	savefile->WriteInt(healthBoosts);
+	savefile->WriteFloat(attackSpeedBoost);
+	savefile->WriteInt(speedBoosts);
+	savefile->WriteFloat(jumpBoost);
+	savefile->WriteInt(leechBoosts);
 
 	savefile->WriteInt( maxHealth );
 	savefile->WriteInt( weapons );
@@ -478,6 +506,12 @@ idInventory::Restore
 */
 void idInventory::Restore( idRestoreGame *savefile ) {
 	int i, num;
+
+	savefile->ReadInt(healthBoosts);
+	savefile->ReadFloat(attackSpeedBoost);
+	savefile->ReadInt(speedBoosts);
+	savefile->ReadFloat(jumpBoost);
+	savefile->ReadInt(leechBoosts);
 
 	savefile->ReadInt( maxHealth );
 	savefile->ReadInt( weapons );
@@ -8752,6 +8786,10 @@ void idPlayer::AdjustSpeed( void ) {
 		bobFrac = 0.0f;
 	}
 
+	if (inventory.speedBoosts != NULL) {
+		speed += inventory.speedBoosts * 50;
+	}
+
 	speed *= PowerUpModifier(PMOD_SPEED);
 
 	if ( influenceActive == INFLUENCE_LEVEL3 ) {
@@ -8947,6 +8985,7 @@ void idPlayer::GetAASLocation( idAAS *aas, idVec3 &pos, int &areaNum ) const {
 	pos = physicsObj.GetOrigin();
 }
 
+
 /*
 ==============
 idPlayer::Move
@@ -8965,7 +9004,7 @@ void idPlayer::Move( void ) {
 
 	// set physics variables
 	physicsObj.SetMaxStepHeight( pm_stepsize.GetFloat() );
-	physicsObj.SetMaxJumpHeight( pm_jumpheight.GetFloat() );
+	physicsObj.SetMaxJumpHeight( pm_jumpheight.GetFloat() * inventory.jumpBoost);
 
 	if ( noclip ) {
 		physicsObj.SetContents( 0 );
@@ -12980,6 +13019,22 @@ void idPlayer::DamageFeedback( idEntity *victim, idEntity *inflictor, int &damag
 	} 
 
 	SetLastHitTime( gameLocal.time, armorHit );
+
+	if (inventory.leechBoosts > 0) {
+		int newhealth = health + inventory.leechBoosts;
+		if (newhealth > inventory.maxHealth) {
+			health = inventory.maxHealth;
+		}
+		else {
+			health = newhealth;
+		}
+	}
+	/*
+	if (victim->name) {
+		//gameLocal.Printf("Hit entity %s", victim->name);
+		health += 1;
+	}
+	*/
 }
 
 /*
@@ -14075,6 +14130,34 @@ int idPlayer::CanSelectWeapon(const char* weaponName)
 	}
 
 	return weaponNum;
+}
+
+void idInventory::AddHealthBoost() {
+	healthBoosts += 1;
+	maxHealth = 100 + (healthBoosts * 15);
+	if (gameLocal.GetLocalPlayer()) {
+		gameLocal.Printf("new max health: %d, current health: %d\n", maxHealth, gameLocal.GetLocalPlayer()->health);
+		gameLocal.GetLocalPlayer()->health += 15;
+	}
+}
+
+void idInventory::AddAttackSpeedBoost() {
+	attackSpeedBoost *= 0.5;
+	gameLocal.Printf("new time between attacks multiplier: %f\n", attackSpeedBoost);
+}
+
+void idInventory::AddSpeedBoost() {
+	speedBoosts += 1;
+	gameLocal.Printf("new speed boost count: %d\n", speedBoosts);
+}
+
+void idInventory::AddJumpBoost() {
+	jumpBoost *= 1.25;
+	gameLocal.Printf("new jump multiplier: %f\n", jumpBoost);
+}
+void idInventory::AddLeechBoost() {
+	leechBoosts += 1;
+	gameLocal.Printf("new health gained on hit: %d\n", leechBoosts);
 }
 
 // RITUAL END

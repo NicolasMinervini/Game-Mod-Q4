@@ -167,9 +167,14 @@ stateResult_t rvWeaponShotgun::State_Fire( const stateParms_t& parms ) {
 		STAGE_INIT,
 		STAGE_WAIT,
 	};	
+	float asb = 1.0f;
 	switch ( parms.stage ) {
 		case STAGE_INIT:
-			nextAttackTime = gameLocal.time + (fireRate * owner->PowerUpModifier ( PMOD_FIRERATE ));
+			//float asb = 1.0f;
+			if (gameLocal.GetLocalPlayer()) {
+				asb = gameLocal.GetLocalPlayer()->inventory.attackSpeedBoost;
+			}
+			nextAttackTime = gameLocal.time + (fireRate * asb * owner->PowerUpModifier ( PMOD_FIRERATE ));
 			//Attack( false, hitscans, spread, 0, 1.0f );
 			/*
 			if (gameLocal.time - heldTime > tripleHoldLength) {
