@@ -625,6 +625,7 @@ void idItem::SendPickupMsg( int clientNum ) {
 	gameLocal.SendUnreliableMessagePVS( msg, this, itemPVSArea );	
 }
 
+
 /*
 ================
 idItem::Pickup
@@ -1209,6 +1210,7 @@ void idItemPowerup::Think( void ) {
 		PostEventMS( &EV_RespawnItem, 0 );
 	}
 }
+
 
 /*
 ================

@@ -4289,6 +4289,27 @@ bool idPlayer::GiveItem( idItem *item ) {
 	if ( arg && hud ) {
 		hud->HandleNamedEvent( "armorPulse" );
 	}
+	//give picked up boost items to player
+	arg = item->spawnArgs.MatchPrefix("inv_boost", NULL);
+	if (arg && hud) {
+		int boostnum = item->spawnArgs.GetInt("inv_boost");
+		gameLocal.Printf("Picked up boost number %d\n", boostnum);
+		if (boostnum == 1) {
+			inventory.AddHealthBoost();
+		}
+		else if (boostnum == 2) {
+			inventory.AddAttackSpeedBoost();
+		}
+		else if (boostnum == 3) {
+			inventory.AddSpeedBoost();
+		}
+		else if (boostnum == 4) {
+			inventory.AddJumpBoost();
+		}
+		else if (boostnum == 5) {
+			inventory.AddLeechBoost();
+		}
+	}
 	
 //	GiveDatabaseEntry ( &item->spawnArgs );
 	
