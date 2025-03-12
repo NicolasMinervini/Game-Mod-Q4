@@ -13,7 +13,7 @@ NOTE: this mod is only meant to run on Windows. You must also have a copy of Qua
 3. add " +set fs_game RiskOfRainMod" to the end of the text, making sure to have a space between the last quotation mark and the +. within the Target text box, it should now read *"(YourQuake4FilesLocation)\Quake4.exe" +set fs_game RiskOfRainMod*
 4. Running this shortcut should now load Quake 4 directly into the mod.
 
-## features of this mod
+# Features of this mod
 1. All weapons no longer run out of ammunition. Have fun.
 2. The Blaster, Machine Gun, Shotgun, and Grenade Launcher have been modified.
    - The blaster automatically shoots so long as the fire button is held down. The charged attack has been removed.
