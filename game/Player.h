@@ -203,6 +203,7 @@ public:
 
 	//fire rate MULTIPLIER (the time waiting between shots will be multiplied by this. Picking up upgrades should probbaly LOWER this value!)
 	float  attackSpeedBoost = 1.0f;
+	int atkBoostCount = 0;
 	void AddAttackSpeedBoost();
 
 	//increased speed ADDITIVE
@@ -211,6 +212,7 @@ public:
 
 	//jump height MULTIPLIER (this value should INCREASE!)
 	float jumpBoost = 1.0f;
+	int jumpBoostCount = 0;
 	void AddJumpBoost();
 
 	//number of health gained on hit. ADDITIVE
@@ -290,6 +292,8 @@ public:
 
 class idPlayer : public idActor {
 public:
+
+	void UpdateBoosts();
 
  	enum {
  		EVENT_IMPULSE = idEntity::EVENT_MAXEVENTS,

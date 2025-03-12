@@ -3076,6 +3076,15 @@ void Cmd_GiveLeech_f(const idCmdArgs& args) {
 		gameLocal.Printf("No local player!\n");
 	}
 }
+void Cmd_ChangeDropMode_f(const idCmdArgs& args) {
+	gameLocal.randomizeDrops = !gameLocal.randomizeDrops;
+	if (gameLocal.randomizeDrops) {
+		gameLocal.Printf("Upgrades drops will now be randomized!\n");
+	}
+	else {
+		gameLocal.Printf("Upgrade drops will now be consistent!\n");
+	}
+}
 
 #ifndef _FINAL
 void Cmd_ClientOverflowReliable_f( const idCmdArgs& args ) {
@@ -3114,6 +3123,7 @@ void idGameLocal::InitConsoleCommands( void ) {
 	cmdSystem->AddCommand("speedupgrade", Cmd_GiveSpeed_f, CMD_FL_GAME, "gives the player a movement speed upgrade");
 	cmdSystem->AddCommand("jumpupgrade", Cmd_GiveJump_f, CMD_FL_GAME, "gives the player a jump height upgrade");
 	cmdSystem->AddCommand("leechUpgrade", Cmd_GiveLeech_f, CMD_FL_GAME, "gives the player a leeching upgrade");
+	cmdSystem->AddCommand("drops", Cmd_ChangeDropMode_f, CMD_FL_GAME, "swaps between random upgrade drops and consistent drops for testing");
 
 	cmdSystem->AddCommand( "game_memory",			idClass::DisplayInfo_f,		CMD_FL_GAME,				"displays game class info" );
 	cmdSystem->AddCommand( "listClasses",			idClass::ListClasses_f,		CMD_FL_GAME,				"lists game classes" );

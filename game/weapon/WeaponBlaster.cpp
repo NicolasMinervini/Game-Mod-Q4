@@ -360,7 +360,11 @@ stateResult_t rvWeaponBlaster::State_Charge ( const stateParms_t& parms ) {
 				}
 				
 				return SRESULT_WAIT;
-			} 
+			}
+			else if (!wsfl.attack) {
+				SetState ( "Fire", 0 );
+				return SRESULT_DONE;
+			}
 			SetState ( "Charged", 4 );
 			return SRESULT_DONE;
 	}

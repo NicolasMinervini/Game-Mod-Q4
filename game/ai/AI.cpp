@@ -1753,6 +1753,13 @@ void idAI::Killed( idEntity *inflictor, idEntity *attacker, int damage, const id
 		}
 		kv = spawnArgs.MatchPrefix( "def_drops", kv );
 	}
+
+	const char* nm = gameLocal.getNextUpgradeDrop();
+	//const char* nm = "item_boost_health";
+
+	idDict args;
+	args.Set("origin", physicsObj.GetAbsBounds().GetCenter().ToString());
+	gameLocal.SpawnEntityDef(nm, &args);
 }
 
 /***********************************************************************

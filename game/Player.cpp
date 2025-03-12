@@ -9213,6 +9213,7 @@ void idPlayer::UpdateIntentDir ( void ) {
 	}
 }
 
+
 /*
 ==============
 idPlayer::UpdateHud
@@ -14159,26 +14160,50 @@ void idInventory::AddHealthBoost() {
 	if (gameLocal.GetLocalPlayer()) {
 		gameLocal.Printf("new max health: %d, current health: %d\n", maxHealth, gameLocal.GetLocalPlayer()->health);
 		gameLocal.GetLocalPlayer()->health += 15;
+
+		gameLocal.GetLocalPlayer()->UpdateBoosts();
 	}
+	//player_healthboosts
 }
 
 void idInventory::AddAttackSpeedBoost() {
-	attackSpeedBoost *= 0.5;
+	attackSpeedBoost *= 0.75;
+	atkBoostCount += 1;
 	gameLocal.Printf("new time between attacks multiplier: %f\n", attackSpeedBoost);
+	if (gameLocal.GetLocalPlayer()) {
+		gameLocal.GetLocalPlayer()->UpdateBoosts();
+	}
 }
 
 void idInventory::AddSpeedBoost() {
 	speedBoosts += 1;
 	gameLocal.Printf("new speed boost count: %d\n", speedBoosts);
+	if (gameLocal.GetLocalPlayer()) {
+		gameLocal.GetLocalPlayer()->UpdateBoosts();
+	}
 }
 
 void idInventory::AddJumpBoost() {
 	jumpBoost *= 1.25;
+	jumpBoostCount += 1;
 	gameLocal.Printf("new jump multiplier: %f\n", jumpBoost);
+	if (gameLocal.GetLocalPlayer()) {
+		gameLocal.GetLocalPlayer()->UpdateBoosts();
+	}
 }
 void idInventory::AddLeechBoost() {
 	leechBoosts += 1;
 	gameLocal.Printf("new health gained on hit: %d\n", leechBoosts);
+	if (gameLocal.GetLocalPlayer()) {
+		gameLocal.GetLocalPlayer()->UpdateBoosts();
+	}
 }
 
+void idPlayer::UpdateBoosts() {
+	hud->SetStateInt("player_healthboosts", inventory.healthBoosts);
+	hud->SetStateInt("player_atkboosts", inventory.atkBoostCount);
+	hud->SetStateInt("player_speedboosts", inventory.speedBoosts);
+	hud->SetStateInt("player_jumpboosts", inventory.jumpBoostCount);
+	hud->SetStateInt("player_leechboosts", inventory.leechBoosts);
+}
 // RITUAL END
